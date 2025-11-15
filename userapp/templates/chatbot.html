@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Her Time Chatbot</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        body { font-family: Arial, sans-serif; background: #fff6f8; padding: 20px; }
+        h1 { color: #f48ca0; }
+        input, button { padding: 10px; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { background: #f48ca0; color: white; cursor: pointer; }
+        .chat-box { background: white; padding: 15px; border-radius: 10px; margin-top: 20px; max-width: 500px; }
+    </style>
+</head>
+<body>
+    <h1>Her Time 💗</h1>
+    <h3>Ask me anything about menstrual health, PMS, or well-being.</h3>
+
+    <input type="text" id="userMessage" placeholder="Type your question...">
+    <button onclick="sendMessage()">Send</button>
+
+    <div class="chat-box" id="chatBox"></div>
+
+    <script>
+        function sendMessage() {
+            const message = document.getElementById("userMessage").value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+            fetch("", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `message=${encodeURIComponent(message)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                const chatBox = document.getElementById("chatBox");
+                if (data.reply) {
+                    chatBox.innerHTML += `<p><b>You: </b> ${message}</p>`;
+                    chatBox.innerHTML += `<p><b>Bot: </b> ${data.reply}</p>`;
+                } else if (data.error) {
+                    chatBox.innerHTML += `<p style="color:red;">Error: ${data.error}</p>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HerTime Admin - Home</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #fff6f8;
+        color: #333;
+    }
+
+    /* Navbar */
+    .navbar {
+        background-color: #f8b6c1;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+    }
+    .navbar h1 {
+        margin: 0;
+        font-size: 20px;
+    }
+    .nav-links {
+        display: flex;
+        gap: 15px;
+    }
+    .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 5px 8px;
+        border-radius: 4px;
+        transition: background 0.3s;
+    }
+    .nav-links a:hover {
+        background-color: #f48ca0;
+    }
+
+    /* Cards */
+    .cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin: 20px;
+    }
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        flex: 1 1 200px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+        color: #f48ca0;
+        margin-bottom: 10px;
+    }
+    .card p {
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    /* Mini Calendar */
+    .mini-calendar {
+        background: white;
+        margin: 20px;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        width: 300px;
+    }
+    .mini-calendar h2 {
+        text-align: center;
+        color: #f48ca0;
+        margin-bottom: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 4px;
+        text-align: center;
+        font-size: 12px;
+    }
+    th {
+        background-color: #f8b6c1;
+        color: white;
+    }
+    td {
+        border: 1px solid #eee;
+    }
+    .today {
+        background-color: #f48ca0 !important;
+        color: white;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    .view-btn {
+        display: block;
+        background-color: #f48ca0;
+        color: white;
+        text-align: center;
+        padding: 8px;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: 10px;
+    }
+
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    font-size: 16px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 10px 15px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8b6c1;
+    color: white;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    background-color: #f48ca0;
+    border-radius: 5px;
+}
+
+</style>
+</head>
+<body>
+<div class="navbar">
+    <h1>HerTime Admin</h1>
+    <div class="nav-links">
+        <a href="{% url 'index' %}">Home</a>
+        <a href="{% url 'category_page' %}">Categories</a>
+        <!-- Dropdown -->
+        <div class="dropdown">
+            <button class="dropbtn">Products ▾</button>
+            <div class="dropdown-content">
+                <a href="{% url 'add_product' %}">Add Product</a>
+                <a href="{% url 'view_products' %}">View Products</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="dropbtn">Books ▾</button>
+            <div class="dropdown-content">
+                <a href="{% url 'add_book' %}"> Add Book</a>
+                <a href="{% url 'view_books' %}">View Books</a>
+            </div>
+        </div>
+        <a href="{% url 'admin_view_orders' %}">Orders</a>
+        <a href="{% url 'admin_view_users'%}">View Users</a>
+        <a href="">Logout</a>
+    </div>
+</div>
+{% block content %}
+
+
+<section class="cards">
+    <div class="card">
+        <h3>Active Users</h3>
+        <p>1,245</p>
+    </div>
+    <div class="card">
+        <h3>Products Sold</h3>
+        <p>532</p>
+    </div>
+    <div class="card">
+        <h3>New Signups</h3>
+        <p>78</p>
+    </div>
+</section>
+
+<!-- Mini Calendar -->
+<!-- <div class="mini-calendar">
+    <h2 id="monthTitle"></h2>
+    <div id="miniCal"></div>
+    <a href="{% url 'calendar' %}" class="view-btn">View Full Calendar</a>
+</div> -->
+{% endblock %}
+
+<!-- <script>
+function generateMiniCalendar() {
+    const container = document.getElementById("miniCal");
+    const date = new Date();
+    const month = date.toLocaleString('default', { month: 'long' });
+    const year = date.getFullYear();
+    document.getElementById("monthTitle").textContent = `${month} ${year}`;
+
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    let html = "<table><tr>";
+    days.forEach(d => html += `<th>${d}</th>`);
+    html += "</tr><tr>";
+
+    const firstDay = new Date(year, date.getMonth(), 1).getDay();
+    const daysInMonth = new Date(year, date.getMonth() + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) html += "<td></td>";
+    for (let day = 1; day <= daysInMonth; day++) {
+        let isToday = (day === date.getDate());
+        html += `<td class="${isToday ? 'today' : ''}">${day}</td>`;
+        if ((day + firstDay) % 7 === 0) html += "</tr><tr>";
+    }
+    html += "</tr></table>";
+    container.innerHTML = html;
+}
+
+generateMiniCalendar();
+</script> -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+</body>
+</html>
