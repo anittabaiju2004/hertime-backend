@@ -15,7 +15,7 @@ if not api_key:
 genai.configure(api_key=api_key)
 
 # Create model instance
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # Period-related keywords
 PERIOD_KEYWORDS = [
@@ -31,35 +31,35 @@ PERIOD_KEYWORDS = [
 # Greeting keywords
 GREETINGS = ["hi", "hello", "hey", "good morning", "good evening", "good afternoon"]
 
-def chatbot_view(request):
-    if request.method == "POST":
-        user_message = request.POST.get("message", "").lower().strip()
+# def chatbot_view(request):
+#     if request.method == "POST":
+#         user_message = request.POST.get("message", "").lower().strip()
 
-        if not user_message:
-            return JsonResponse({"error": "Message is empty"}, status=400)
+#         if not user_message:
+#             return JsonResponse({"error": "Message is empty"}, status=400)
 
-        # Check for greetings
-        if any(greet in user_message for greet in GREETINGS):
-            return JsonResponse({
-                "reply": "Hello! 😊 I'm Her Time, your menstrual health assistant. You can ask me about periods, ovulation, PMS, or cycle tracking."
-            })
+#         # Check for greetings
+#         if any(greet in user_message for greet in GREETINGS):
+#             return JsonResponse({
+#                 "reply": "Hello! 😊 I'm Her Time, your menstrual health assistant. You can ask me about periods, ovulation, PMS, or cycle tracking."
+#             })
 
-        # Check for period-related topics
-        if not any(keyword in user_message for keyword in PERIOD_KEYWORDS):
-            return JsonResponse({
-                "reply": "I can only answer questions related to menstrual health, periods, ovulation, and PMS."
-            })
+#         # Check for period-related topics
+#         if not any(keyword in user_message for keyword in PERIOD_KEYWORDS):
+#             return JsonResponse({
+#                 "reply": "I can only answer questions related to menstrual health, periods, ovulation, and PMS."
+#             })
 
-        try:
-            # Keep Gemini focused on menstrual health
-            response = model.generate_content(
-                f"You are a menstrual health assistant. Answer only about periods, cycles, ovulation, and PMS. Question: {user_message}"
-            )
-            return JsonResponse({"reply": response.text})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+#         try:
+#             # Keep Gemini focused on menstrual health
+#             response = model.generate_content(
+#                 f"You are a menstrual health assistant. Answer only about periods, cycles, ovulation, and PMS. Question: {user_message}"
+#             )
+#             return JsonResponse({"reply": response.text})
+#         except Exception as e:
+#             return JsonResponse({"error": str(e)}, status=500)
 
-    return render(request, "chatbot.html")
+#     return render(request, "chatbot.html")
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -135,6 +135,17 @@ class ChatbotAPIView(APIView):
                 "type": "error",
                 "reply": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -402,39 +413,94 @@ class ViewCart(APIView):
         cart = Cart.objects.filter(user_id=user_id, status="pending")
         data = CartSerializer(cart, many=True, context={'request': request}).data
         return Response({"cart": data})
-
 class CartPaymentView(APIView):
     def post(self, request):
         serializer = CartPaymentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         pay = serializer.save(payment_choice="cart_payment")
-        return Response({"status": "success", "payment": serializer.data})
+
+        # ✅ UPDATE CART STATUS AFTER SUCCESSFUL PAYMENT
+        cart_ids = pay.cart_ids          # e.g., [1,2,3]
+        Cart.objects.filter(id__in=cart_ids).update(status="completed")
+
+        return Response({
+            "status": "success",
+            "message": "Payment successful and cart status updated",
+            "payment": serializer.data
+        }, status=201)
+
+# class MyOrdersView(APIView):
+#     def get(self, request, user_id):
+#         orders = []
+
+#         bookings = ProductBooking.objects.filter(user_id=user_id)
+#         for b in bookings:
+#             pay = getattr(b, 'payment', None)
+#             orders.append({
+#                 # "type": "single_product",
+#                 "product": b.product.name,
+#                 "quantity": b.quantity,
+#                 "total_price": b.total_price,
+#                 "product_image": product_image_url,
+#                 "payment_type": pay.payment_type if pay else None,
+#                 "payment_status": pay.status if pay else None,
+#             })
+
+#         carts = Cart.objects.filter(user_id=user_id)
+#         for c in carts:
+#             pay = CartPayment.objects.filter(user_id=user_id, cart_ids__contains=[c.id]).first()
+#             orders.append({
+#                 # "type": "cart_item",
+#                 "product": c.product.name,
+#                 "quantity": c.quantity,
+#                 "total_price": c.total_price,
+#                 "product_image": product_image_url,
+#                 "payment_type": pay.payment_type if pay else None,
+#                 "payment_status": pay.status if pay else None,
+#             })
+
+#         return Response({"orders": orders})
 
 class MyOrdersView(APIView):
     def get(self, request, user_id):
         orders = []
 
+        # ----------- PRODUCT BOOKINGS ----------
         bookings = ProductBooking.objects.filter(user_id=user_id)
         for b in bookings:
+
+            # ✅ Only /media/... 
+            product_image_url = b.product.image.url if b.product.image else None
+
             pay = getattr(b, 'payment', None)
+
             orders.append({
-                "type": "single_product",
                 "product": b.product.name,
                 "quantity": b.quantity,
                 "total_price": b.total_price,
+                "product_image": product_image_url,
                 "payment_type": pay.payment_type if pay else None,
                 "payment_status": pay.status if pay else None,
             })
 
+        # ----------- CART PURCHASES ----------
         carts = Cart.objects.filter(user_id=user_id)
         for c in carts:
-            pay = CartPayment.objects.filter(user_id=user_id, cart_ids__contains=[c.id]).first()
+
+            # ✅ Only /media/...
+            product_image_url = c.product.image.url if c.product.image else None
+
+            pay = CartPayment.objects.filter(
+                user_id=user_id,
+                cart_ids__contains=[c.id]
+            ).first()
+
             orders.append({
-                "type": "cart_item",
                 "product": c.product.name,
                 "quantity": c.quantity,
                 "total_price": c.total_price,
+                "product_image": product_image_url,
                 "payment_type": pay.payment_type if pay else None,
                 "payment_status": pay.status if pay else None,
             })

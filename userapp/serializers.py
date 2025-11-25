@@ -120,6 +120,15 @@ class CartSerializer(serializers.ModelSerializer):
             'product_name', 'product_image', 'category_name',
             'quantity', 'total_price', 'status', 'created_at'
         ]
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+
+        if instance.product.image:
+            rep['product_image'] = instance.product.image.url  # returns /media/...
+        else:
+            rep['product_image'] = None
+
+        return rep
 
 
 class CartPaymentSerializer(serializers.ModelSerializer):

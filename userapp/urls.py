@@ -9,7 +9,7 @@ from rest_framework import permissions
 from .import views
 from .views import *
 
-from userapp.views import ChatbotAPIView, ProductByCategory, ProductDetailView,RegisterViewSet, login_view,CycleInputViewSet,get_cycle_inputs_by_user,chatbot_view,UserViewBook,UserViewProduct,UserViewCategory   
+from userapp.views import ChatbotAPIView, ProductByCategory, ProductDetailView,RegisterViewSet, login_view,CycleInputViewSet,get_cycle_inputs_by_user,UserViewBook,UserViewProduct,UserViewCategory   
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -33,27 +33,26 @@ urlpatterns = [
    path('', include(router.urls)),  # Now /api/register/ will work
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    
    path("chatbot/", ChatbotAPIView.as_view(), name="chatbot_api"),
    path("login/", login_view, name="login"),
    path("cycle-inputs/user/<int:user_id>/", get_cycle_inputs_by_user, name="cycle_inputs_by_user"),
-   path('chatbot_view/', chatbot_view, name='chatbot_view'),
+   # path('chatbot_view/', chatbot_view, name='chatbot_view'),
    path("user_view_book/", UserViewBook.as_view(), name="user_view_book"),
    path('user_view_category/',UserViewCategory.as_view(),name='user_view_category'),
-   path("user_view_product/", UserViewProduct.as_view(), name="user_view_product"),
+   path("products/", UserViewProduct.as_view(), name="user_view_product"),
    path("products/category/<int:category_id>/", ProductByCategory.as_view(), name="products_by_category"),
    path("product/<int:product_id>/", ProductDetailView.as_view(), name="product_detail"),
-   path('product-booking/', ProductBookingView.as_view(),name='product_booking'),
-   path('product-booking/payment/', BookingPaymentView.as_view(),name='booking_payment'),
-   path('cart/add/<int:product_id>/', CartCreateView.as_view(),name='add_to_cart'),
-   path('cart/update/', UpdateCartQuantity.as_view(), name='update_cart_quantity'),
-   path('cart/remove/<int:cart_id>/', RemoveCartItem.as_view(), name='remove_cart_item'),
+   path('product-bookings/', ProductBookingView.as_view(),name='product_booking'),
+   path('booking-payment/', BookingPaymentView.as_view(),name='booking_payment'),
+   path('cart/<int:product_id>/', CartCreateView.as_view(),name='add_to_cart'),
+   path('update-cart-quantity/', UpdateCartQuantity.as_view(), name='update_cart_quantity'),
+   path('remove-cart-item/<int:cart_id>/', RemoveCartItem.as_view(), name='remove_cart_item'),
 
-   path('cart/<int:user_id>/', ViewCart.as_view(),name='view_cart'),
-   path('cart/payment/', CartPaymentView.as_view(),name='cart_payment'),
+   path('user-cart/<int:user_id>/', ViewCart.as_view(),name='view_cart'),
+   path('cart-payments/', CartPaymentView.as_view(),name='cart_payment'),
    path('my-orders/<int:user_id>/', MyOrdersView.as_view(),name='my_orders'),
 
-]
+] 
 
 
 
